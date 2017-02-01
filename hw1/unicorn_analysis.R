@@ -39,7 +39,8 @@ unicorns_model <- lm(horn.length ~ weight, data = unicorns)
 unicorns_model_coef <- coef(unicorns_model)
 print("Slope: ")
 print(unicorns_model_coef[2]) # Slope
-# Slope is unitless, it is just coefficient
+# 0.03153332
+# weight
 
 print('')
 print("Prediction for fat, 1000 Magical kg, unicorns:")
@@ -52,10 +53,12 @@ print('--------------------------------')
 print('Point 5')
 
 unicorns_plot_residuals_vs_fitted <- qplot(x = fitted(unicorns_model), y = residuals(unicorns_model))
+unicorns_plot_residuals_vs_fitted <- unicorns_plot_residuals_vs_fitted + labs(title = "Residuals vs fitted")
 print(unicorns_plot_residuals_vs_fitted)
 ggsave('unicorns_plot_residuals_vs_fitted.png')
 
 unicorns_plot_residuals <- qplot(sample = residuals(unicorns_model))
+unicorns_plot_residuals <- unicorns_plot_residuals + labs(title = "Residuals")
 print(unicorns_plot_residuals)
 ggsave('unicorns_plot_residuals.png')
 
@@ -69,12 +72,13 @@ pink_unicorns <- subset( unicorns, colour == "pink")
 print("Student's t-Test")
 print(t.test(x=pink_unicorns$weight, y=green_unicorns$weight))
 
-# I've read about using qplot, but I did't found way how to use aes_string in qplot, so I decided to use ggplot
+# I did't found way how to use aes_string in qplot, so I decided to use ggplot
 # Plot boxplot
 
 for (param in c("weight", "horn.length")){
   for (second_param in c("diet", "colour")){
     unicorns_plot <- ggplot(data=unicorns, aes_string(x=second_param, y=param)) + geom_boxplot()
+    unicorns_plot <- unicorns_plot + labs(title = paste(param, " vs ", second_param))
     ggsave(paste('unicorns_plot_boxplot_', param, '_', second_param,'.png'))
   }
 }
@@ -84,6 +88,7 @@ for (param in c("weight", "horn.length")){
 for (param in c("weight", "horn.length")){
   for (second_param in c("diet", "colour")){
     unicorns_plot <- ggplot(data=unicorns, aes_string(x=second_param, y=param)) + geom_jitter()
+    unicorns_plot <- unicorns_plot + labs(title = paste(param, " vs ", second_param))
     ggsave(paste('unicorns_plot_jitter_', param, '_', second_param,'.png'))
   }
 }
@@ -93,6 +98,7 @@ for (param in c("weight", "horn.length")){
 for (param in c("weight", "horn.length")){
   for (second_param in c("diet", "colour")){
     unicorns_plot <- ggplot(data=unicorns, aes_string(x=second_param, y=param)) + geom_boxplot() + geom_jitter()
+    unicorns_plot <- unicorns_plot + labs(title = paste(param, " vs ", second_param))
     ggsave(paste('unicorns_plot_jitter_boxplot_', param, '_', second_param,'.png'))
   }
 }
@@ -100,3 +106,23 @@ for (param in c("weight", "horn.length")){
 
 unicorns_weight_model <- lm(weight ~ colour+diet, data = unicorns)
 print(summary(unicorns_weight_model))
+print(coef(unicorns_weight_model))
+
+# Coef for colour+diet
+#(Intercept)  colourpink dietflowers 
+# 333.570150   45.519804   -8.368133
+
+# Coefficient for colourpink actually reflect the effect size of pink being compared to that of green
+# Same for dietflowers and dietcandies
+
+unicorns_weight_model <- lm(weight ~ colour:diet, data = unicorns)
+print(summary(unicorns_weight_model))
+print(coef(unicorns_weight_model))
+
+# (Intercept)   colourgreen:dietcandy    colourpink:dietcandy colourgreen:dietflowers 
+# 360.56212               -34.61175                30.71947               -27.74033 
+# colourpink:dietflowers 
+# NA
+
+# We can see that coefficient for colourpink:dietflowers is NA. 
+# NA as a coefficient in regression means that the coefficient is not estimable.
