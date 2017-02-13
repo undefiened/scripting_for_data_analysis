@@ -115,7 +115,7 @@ print(coef(unicorns_weight_model))
 # Coefficient for colourpink actually reflect the effect size of pink being compared to that of green
 # Same for dietflowers and dietcandies
 
-unicorns_weight_model <- lm(weight ~ colour:diet, data = unicorns)
+unicorns_weight_model <- lm(weight ~ diet + colour + diet : colour, data = unicorns)
 print(summary(unicorns_weight_model))
 print(coef(unicorns_weight_model))
 
