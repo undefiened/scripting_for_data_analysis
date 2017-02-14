@@ -89,6 +89,54 @@ ggsave('principal_components_colour_2_vs_3.png')
 ###########################################################################
 # Exercise 3
 ###########################################################################
+unicorn_genes_merged <- merge(unicorn_genes, unicorns, by="row.names")
+unicorn_genes_melted <- melt(unicorn_genes_merged, id=c("diet", "colour", "horn.length", "weight", "Row.names"))
+
+# Plot all expressions together without colouring
+
+# Boxplot
+p <- ggplot(unicorn_genes_melted, aes(x=variable, y=value))
+p <- p + geom_boxplot()
+print(p)
+ggsave('all_genes_boxplot.png')
+
+# Jitter
+p <- ggplot(unicorn_genes_melted, aes(x=variable, y=value))
+p <- p + geom_jitter()
+print(p)
+ggsave('all_genes_jitter.png')
+
+# Plot all expressions together with colouring
+
+# Boxplot diet
+p <- ggplot(unicorn_genes_melted, aes(x=variable, y=value))
+p <- p + geom_boxplot(aes(colour=diet))
+print(p)
+ggsave('all_genes_boxplot_diet.png')
+
+# Jitter diet
+p <- ggplot(unicorn_genes_melted, aes(x=variable, y=value))
+p <- p + geom_jitter(aes(colour=diet))
+print(p)
+ggsave('all_genes_jitter_diet.png')
+
+# Boxplot colour
+p <- ggplot(unicorn_genes_melted, aes(x=variable, y=value))
+p <- p + geom_boxplot(aes(colour=colour))
+print(p)
+ggsave('all_genes_boxplot_colour.png')
+
+# Jitter colour
+p <- ggplot(unicorn_genes_melted, aes(x=variable, y=value))
+p <- p + geom_jitter(aes(colour=colour))
+print(p)
+ggsave('all_genes_jitter_colour.png')
+
+# I don't see any patterns
+
+###########################################################################
+# All principal components together (unnecessary)
+###########################################################################
 pc_together <- melt(pc_individuals_data_frame, id=c("diet", "colour", "horn.length", "weight", "Row.names"))
 
 # Plot all pc together without colouring
@@ -133,19 +181,26 @@ p <- p + geom_jitter(aes(colour=colour))
 print(p)
 ggsave('all_pc_jitter_colour.png')
 
-# I don't see any patterns connected to diet or colour
+# I don't see any patterns
 
 ###########################################################################
 # Exercise 4
 ###########################################################################
-expression_melted <- pc_together
+expression_melted <- unicorn_genes_melted
 
 unicorn_expression_model <- function (x) {
   lm(value ~ diet + colour, data=x)
 }
 
 models <- dlply(expression_melted, "variable", unicorn_expression_model)
-result <- ldply(models, coef)
+result_lm <- ldply(models, coef)
 
 # The ldply function returns set of linear regressions models for each variable
-print(summary(result))
+print(summary(result_lm))
+
+# Table of confidence intervals
+
+models <- dlply(expression_melted, "variable", unicorn_expression_model)
+result_confidence <- ldply(models, confint)
+
+print(summary(result_confidence))
